@@ -166,7 +166,7 @@ func (m *Migrator) upAndDownFilePath(
 	}
 
 	up := filepath.Join(m.migrationsFilePath, fmt.Sprintf("%s_%s.%s%s", version, name, "up", ext))
-	down := filepath.Join(m.migrationsFilePath, fmt.Sprintf("%s_%s.%s%s", version, name, "up", ext))
+	down := filepath.Join(m.migrationsFilePath, fmt.Sprintf("%s_%s.%s%s", version, name, "down", ext))
 
 	return up, down, nil
 }
