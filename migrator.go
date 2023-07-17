@@ -32,12 +32,36 @@ type Migrator struct {
 	logger             Logger
 }
 
+func checkAndMakeMigrationsFilePath(migrationsFilePath string) error {
+	fp, err := filepath.Abs(migrationsFilePath)
+	if err != nil {
+		return err
+	}
+	_, err = os.Lstat(fp)
+
+	if os.IsNotExist(err) {
+		e := os.MkdirAll(fp, 0777)
+		if e != nil {
+			return e
+		}
+		return nil
+	} else {
+		return err
+	}
+}
+
 func New(driver database.Driver, databaseName, migrationsFilePath string, migrateFunc migrateFunc) (*Migrator, error) {
 	m, err := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("file://%s", migrationsFilePath),
 		databaseName,
 		driver,
 	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkAndMakeMigrationsFilePath(migrationsFilePath)
 
 	if err != nil {
 		return nil, err
