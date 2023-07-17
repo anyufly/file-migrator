@@ -44,33 +44,33 @@ const (
 )
 
 type migrateFlag struct {
-	verbosePtr     *bool
-	prefetchPtr    *uint
-	lockTimeoutPtr *uint
+	verbosePtr     bool
+	prefetchPtr    uint
+	lockTimeoutPtr uint
 }
 
 type createFlag struct {
-	extPtr       *string
-	seqPtr       *bool
-	seqDigitsPtr *int
-	formatPtr    *string
-	tzPtr        *string
+	extPtr       string
+	seqPtr       bool
+	seqDigitsPtr int
+	formatPtr    string
+	tzPtr        string
 }
 
 type downFlag struct {
-	allPtr *bool
+	allPtr bool
 }
 
 type dropFlag struct {
-	forceDropPtr *bool
+	forceDropPtr bool
 }
 
 type migratorCobraCommandBuilder struct {
 	migrator *Migrator
-	*migrateFlag
-	*createFlag
-	*downFlag
-	*dropFlag
+	migrateFlag
+	createFlag
+	downFlag
+	dropFlag
 }
 
 func (builder *migratorCobraCommandBuilder) Build() *cobra.Command {
@@ -84,9 +84,9 @@ func (builder *migratorCobraCommandBuilder) buildMigrateCmd() *cobra.Command {
 		Long:  migrateUsageDesc,
 	}
 
-	migrateCommand.PersistentFlags().BoolVar(builder.verbosePtr, "verbose", false, "Print verbose logging")
-	migrateCommand.PersistentFlags().UintVar(builder.prefetchPtr, "prefetch", 10, "Number of migrations to load in advance before executing (default 10)")
-	migrateCommand.PersistentFlags().UintVar(builder.lockTimeoutPtr, "lock-timeout", 15, "Allow N seconds to acquire database lock (default 15)")
+	migrateCommand.PersistentFlags().BoolVar(&builder.verbosePtr, "verbose", false, "Print verbose logging")
+	migrateCommand.PersistentFlags().UintVar(&builder.prefetchPtr, "prefetch", 10, "Number of migrations to load in advance before executing (default 10)")
+	migrateCommand.PersistentFlags().UintVar(&builder.lockTimeoutPtr, "lock-timeout", 15, "Allow N seconds to acquire database lock (default 15)")
 
 	createCommand := builder.buildCreateCmd()
 	migrateCommand.AddCommand(createCommand)
@@ -114,12 +114,12 @@ func (builder *migratorCobraCommandBuilder) buildMigrateCmd() *cobra.Command {
 }
 
 func (builder *migratorCobraCommandBuilder) setupMigrator() {
-	if verbose := *builder.verbosePtr; verbose {
+	if verbose := builder.verbosePtr; verbose {
 		builder.migrator.logger.SetVerbose(verbose)
 	}
 
-	builder.migrator.migrate.PrefetchMigrations = *builder.prefetchPtr
-	builder.migrator.migrate.LockTimeout = time.Duration(*builder.lockTimeoutPtr) * time.Second
+	builder.migrator.migrate.PrefetchMigrations = builder.prefetchPtr
+	builder.migrator.migrate.LockTimeout = time.Duration(builder.lockTimeoutPtr) * time.Second
 
 	// handle Ctrl+c
 	signals := make(chan os.Signal, 1)
@@ -155,12 +155,12 @@ func (builder *migratorCobraCommandBuilder) buildCreateCmd() *cobra.Command {
 			name := args[0]
 
 			err := builder.migrator.MakeMigrate(
-				*builder.tzPtr,
-				*builder.formatPtr,
+				builder.tzPtr,
+				builder.formatPtr,
 				name,
-				*builder.extPtr,
-				*builder.seqPtr,
-				*builder.seqDigitsPtr)
+				builder.extPtr,
+				builder.seqPtr,
+				builder.seqDigitsPtr)
 
 			if err != nil {
 				builder.migrator.logger.Fatal(err.Error())
@@ -169,11 +169,11 @@ func (builder *migratorCobraCommandBuilder) buildCreateCmd() *cobra.Command {
 		},
 	}
 
-	createCommand.Flags().StringVar(builder.extPtr, "ext", "", "File extension")
-	createCommand.Flags().BoolVar(builder.seqPtr, "seq", false, "Use sequential numbers instead of timestamps (default: false)")
-	createCommand.Flags().IntVar(builder.seqDigitsPtr, "digits", 6, "The number of digits to use in sequences (default: 6)")
-	createCommand.Flags().StringVar(builder.formatPtr, "format", "", `The Go time format string to use. If the string "unix" or "unixNano" is specified, then the seconds or nanoseconds since January 1, 1970 UTC respectively will be used. Caution, due to the behavior of time.Time.Format(), invalid format strings will not error`)
-	createCommand.Flags().StringVar(builder.tzPtr, "tz", "", `The timezone that will be used for format time (default: local)`)
+	createCommand.Flags().StringVar(&builder.extPtr, "ext", "", "File extension")
+	createCommand.Flags().BoolVar(&builder.seqPtr, "seq", false, "Use sequential numbers instead of timestamps (default: false)")
+	createCommand.Flags().IntVar(&builder.seqDigitsPtr, "digits", 6, "The number of digits to use in sequences (default: 6)")
+	createCommand.Flags().StringVar(&builder.formatPtr, "format", "", `The Go time format string to use. If the string "unix" or "unixNano" is specified, then the seconds or nanoseconds since January 1, 1970 UTC respectively will be used. Caution, due to the behavior of time.Time.Format(), invalid format strings will not error`)
+	createCommand.Flags().StringVar(&builder.tzPtr, "tz", "", `The timezone that will be used for format time (default: local)`)
 
 	return createCommand
 
@@ -206,7 +206,7 @@ func (builder *migratorCobraCommandBuilder) buildGotoCmd() *cobra.Command {
 				builder.migrator.logger.Info(err.Error())
 			}
 
-			if *builder.verbosePtr {
+			if builder.verbosePtr {
 				builder.migrator.logger.Info(fmt.Sprintf("Finished After %d ms", time.Since(startTime).Microseconds()))
 			}
 		},
@@ -242,7 +242,7 @@ func (builder *migratorCobraCommandBuilder) buildUpCommand() *cobra.Command {
 				builder.migrator.logger.Info(err.Error())
 			}
 
-			if *builder.verbosePtr {
+			if builder.verbosePtr {
 				builder.migrator.logger.Info(fmt.Sprintf("Finished After %d ms", time.Since(startTime).Microseconds()))
 			}
 
@@ -284,7 +284,7 @@ func (builder *migratorCobraCommandBuilder) buildDownCommand() *cobra.Command {
 			defer builder.closeMigrator()
 			builder.setupMigrator()
 
-			num, needsConfirm, err := numDownMigrationsFromArgs(*builder.allPtr, args)
+			num, needsConfirm, err := numDownMigrationsFromArgs(builder.allPtr, args)
 			if err != nil {
 				builder.migrator.logger.Fatal(err.Error())
 			}
@@ -311,14 +311,14 @@ func (builder *migratorCobraCommandBuilder) buildDownCommand() *cobra.Command {
 				builder.migrator.logger.Info(err.Error())
 			}
 
-			if *builder.verbosePtr {
+			if builder.verbosePtr {
 				builder.migrator.logger.Info(fmt.Sprintf("Finished After %d ms", time.Since(startTime).Microseconds()))
 			}
 
 		},
 	}
 
-	downCommand.Flags().BoolVar(builder.allPtr, "all", false, "Apply all down migrations")
+	downCommand.Flags().BoolVar(&builder.allPtr, "all", false, "Apply all down migrations")
 
 	return downCommand
 }
@@ -332,7 +332,7 @@ func (builder *migratorCobraCommandBuilder) buildDropCommand() *cobra.Command {
 			defer builder.closeMigrator()
 			builder.setupMigrator()
 
-			if !*builder.forceDropPtr {
+			if !builder.forceDropPtr {
 				fmt.Println("Are you sure you want to drop the entire database schema? [y/N]")
 				var response string
 				_, _ = fmt.Scanln(&response)
@@ -350,13 +350,13 @@ func (builder *migratorCobraCommandBuilder) buildDropCommand() *cobra.Command {
 				builder.migrator.logger.Fatal(err.Error())
 			}
 
-			if *builder.verbosePtr {
+			if builder.verbosePtr {
 				builder.migrator.logger.Info(fmt.Sprintf("Finished After %d ms", time.Since(startTime).Microseconds()))
 			}
 		},
 	}
 
-	dropCommand.Flags().BoolVar(builder.forceDropPtr, "f", false, "Force the drop command by bypassing the confirmation prompt")
+	dropCommand.Flags().BoolVar(&builder.forceDropPtr, "f", false, "Force the drop command by bypassing the confirmation prompt")
 
 	return dropCommand
 }
@@ -388,7 +388,7 @@ func (builder *migratorCobraCommandBuilder) buildForceCommand() *cobra.Command {
 				builder.migrator.logger.Fatal(err.Error())
 			}
 
-			if *builder.verbosePtr {
+			if builder.verbosePtr {
 				builder.migrator.logger.Info(fmt.Sprintf("Finished After %d ms", time.Since(startTime).Microseconds()))
 			}
 
