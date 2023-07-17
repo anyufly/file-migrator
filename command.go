@@ -14,29 +14,29 @@ import (
 )
 
 const (
-	migrateUsage     = "migrate OPTIONS COMMAND [arg...]"
+	migrateUsage     = "migrate"
 	migrateUsageDesc = `a CLI command for migrate databases`
 
-	createUsage     = "create [-ext E] [-seq] [-digits N] [-format] [-tz] NAME"
+	createUsage     = "create"
 	createUsageDesc = `Create a set of timestamped up/down migrations titled NAME, with extension E.
-	Use -seq option to generate sequential up/down migrations with N digits.
-	Use -format option to specify a Go time format string. Note: migrations with the same time cause "duplicate migration version" error.
-	Use -tz option to specify the timezone that will be used when generating non-sequential migrations (defaults: Local).`
+Use -seq option to generate sequential up/down migrations with N digits.
+Use -format option to specify a Go time format string. Note: migrations with the same time cause "duplicate migration version" error.
+Use -tz option to specify the timezone that will be used when generating non-sequential migrations (defaults: Local).`
 	gotoUsage     = "goto V"
 	gotoUsageDesc = `Migrate to version V`
 
-	upUsage     = "up [N]"
+	upUsage     = "up"
 	upUsageDesc = "Apply all or N up migrations"
 
-	downUsage     = "down [N] [-all]"
+	downUsage     = "down"
 	downUsageDesc = `Apply all or N down migrations
-	Use -all to apply all down migrations`
+Use -all to apply all down migrations`
 
-	dropUsage     = "drop [-f]"
+	dropUsage     = "drop"
 	dropUsageDesc = `Drop everything inside database
-	Use -f to bypass confirmation`
+Use -f to bypass confirmation`
 
-	forceUsage     = "force V"
+	forceUsage     = "force"
 	forceUsageDesc = `Set version V but don't run migration (ignores dirty state)`
 
 	versionUsage     = "version"
@@ -85,8 +85,8 @@ func (builder *migratorCobraCommandBuilder) buildMigrateCmd() *cobra.Command {
 	}
 
 	migrateCommand.PersistentFlags().BoolVar(&builder.verbosePtr, "verbose", false, "Print verbose logging")
-	migrateCommand.PersistentFlags().UintVar(&builder.prefetchPtr, "prefetch", 10, "Number of migrations to load in advance before executing (default 10)")
-	migrateCommand.PersistentFlags().UintVar(&builder.lockTimeoutPtr, "lock-timeout", 15, "Allow N seconds to acquire database lock (default 15)")
+	migrateCommand.PersistentFlags().UintVar(&builder.prefetchPtr, "prefetch", 10, "Number of migrations to load in advance before executing")
+	migrateCommand.PersistentFlags().UintVar(&builder.lockTimeoutPtr, "lock-timeout", 15, "Allow N seconds to acquire database lock")
 
 	createCommand := builder.buildCreateCmd()
 	migrateCommand.AddCommand(createCommand)
@@ -171,7 +171,7 @@ func (builder *migratorCobraCommandBuilder) buildCreateCmd() *cobra.Command {
 
 	createCommand.Flags().StringVar(&builder.extPtr, "ext", "", "File extension")
 	createCommand.Flags().BoolVar(&builder.seqPtr, "seq", false, "Use sequential numbers instead of timestamps (default: false)")
-	createCommand.Flags().IntVar(&builder.seqDigitsPtr, "digits", 6, "The number of digits to use in sequences (default: 6)")
+	createCommand.Flags().IntVar(&builder.seqDigitsPtr, "digits", 6, "The number of digits to use in sequences")
 	createCommand.Flags().StringVar(&builder.formatPtr, "format", "", `The Go time format string to use. If the string "unix" or "unixNano" is specified, then the seconds or nanoseconds since January 1, 1970 UTC respectively will be used. Caution, due to the behavior of time.Time.Format(), invalid format strings will not error`)
 	createCommand.Flags().StringVar(&builder.tzPtr, "tz", "", `The timezone that will be used for format time (default: local)`)
 
