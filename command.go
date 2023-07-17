@@ -14,29 +14,29 @@ import (
 )
 
 const (
-	migrateUsage     = "migrate"
+	migrateUsage     = "migrate COMMAND"
 	migrateUsageDesc = `a CLI command for migrate databases`
 
-	createUsage     = "create"
+	createUsage     = "create NAME"
 	createUsageDesc = `Create a set of timestamped up/down migrations titled NAME, with extension E.
-Use -seq option to generate sequential up/down migrations with N digits.
-Use -format option to specify a Go time format string. Note: migrations with the same time cause "duplicate migration version" error.
-Use -tz option to specify the timezone that will be used when generating non-sequential migrations (defaults: Local).`
+			Use -seq option to generate sequential up/down migrations with N digits.
+			Use -format option to specify a Go time format string. Note: migrations with the same time cause "duplicate migration version" error.
+			Use -tz option to specify the timezone that will be used when generating non-sequential migrations (defaults: Local).`
 	gotoUsage     = "goto V"
 	gotoUsageDesc = `Migrate to version V`
 
-	upUsage     = "up"
+	upUsage     = "up [N]"
 	upUsageDesc = "Apply all or N up migrations"
 
-	downUsage     = "down"
+	downUsage     = "down [N]"
 	downUsageDesc = `Apply all or N down migrations
-Use -all to apply all down migrations`
+			Use --all to apply all down migrations`
 
 	dropUsage     = "drop"
 	dropUsageDesc = `Drop everything inside database
-Use -f to bypass confirmation`
+			Use --f to bypass confirmation`
 
-	forceUsage     = "force"
+	forceUsage     = "force V"
 	forceUsageDesc = `Set version V but don't run migration (ignores dirty state)`
 
 	versionUsage     = "version"
@@ -168,7 +168,6 @@ func (builder *migratorCobraCommandBuilder) buildCreateCmd() *cobra.Command {
 
 		},
 	}
-
 	createCommand.Flags().StringVar(&builder.extPtr, "ext", "", "File extension")
 	createCommand.Flags().BoolVar(&builder.seqPtr, "seq", false, "Use sequential numbers instead of timestamps (default: false)")
 	createCommand.Flags().IntVar(&builder.seqDigitsPtr, "digits", 6, "The number of digits to use in sequences")
