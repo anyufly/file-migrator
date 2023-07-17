@@ -192,7 +192,7 @@ func (m *Migrator) MakeMigrate(timeZoneName string, format string, name string, 
 	var upBuffer, downBuffer bytes.Buffer
 
 	for tableName, sqlList := range migrateResult.Up() {
-		upBuffer.WriteString(fmt.Sprintf("--%s\n", tableName))
+		upBuffer.WriteString(fmt.Sprintf("-- %s\n", tableName))
 
 		for _, sql := range sqlList {
 			upBuffer.WriteString(fmt.Sprintf("%s;\n", sql))
@@ -201,7 +201,7 @@ func (m *Migrator) MakeMigrate(timeZoneName string, format string, name string, 
 	}
 
 	for tableName, sqlList := range migrateResult.Down() {
-		downBuffer.WriteString(fmt.Sprintf("--%s\n", tableName))
+		downBuffer.WriteString(fmt.Sprintf("-- %s\n", tableName))
 
 		for _, sql := range sqlList {
 			downBuffer.WriteString(fmt.Sprintf("%s;\n", sql))
