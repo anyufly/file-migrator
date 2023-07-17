@@ -374,7 +374,7 @@ func (builder *migratorCobraCommandBuilder) buildForceCommand() *cobra.Command {
 				builder.migrator.logger.Fatal("please specify version argument V")
 			}
 
-			v, err := strconv.ParseUint(args[0], 10, 64)
+			v, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
 				builder.migrator.logger.Fatal("can't read version argument V")
 			}
