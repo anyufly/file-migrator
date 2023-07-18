@@ -24,7 +24,7 @@ type migrateLogger struct {
 }
 
 func (m *migrateLogger) Printf(format string, v ...interface{}) {
-	m.logger.Info(fmt.Sprintf(format, v))
+	m.logger.Info(fmt.Sprintf(format, v...))
 }
 
 func (m *migrateLogger) Verbose() bool {
