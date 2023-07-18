@@ -61,6 +61,8 @@ func New(driver database.Driver, databaseName, migrationsFilePath string, migrat
 		return nil, err
 	}
 
+	m.Log = defaultLogger
+
 	err = checkAndMakeMigrationsFilePath(migrationsFilePath)
 
 	if err != nil {
@@ -203,7 +205,7 @@ func (m *Migrator) MakeMigrate(timeZoneName string, format string, name string, 
 	}
 
 	if migrateResult.Empty() {
-		m.migrate.Log.Printf("no change")
+		m.logger.Info("no change")
 		return nil
 	}
 
